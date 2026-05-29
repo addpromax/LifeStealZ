@@ -9,6 +9,7 @@ import java.sql.SQLException;
  */
 public final class SQLiteConnectionPool implements ConnectionPool {
     private final String connectionUrl;
+    private Connection connection;
 
     public SQLiteConnectionPool(String path) {
         connectionUrl = "jdbc:sqlite:" + path;
@@ -20,12 +21,11 @@ public final class SQLiteConnectionPool implements ConnectionPool {
      * @throws SQLException if an error occurs while getting a connection
      */
     @Override
-    public Connection getConnection() throws SQLException {
-        try {
-            return DriverManager.getConnection(connectionUrl);
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to create connection to SQLite database: " + e.getMessage());
+    public synchronized Connection getConnection() throws SQLException {
+        if (isConnectionDead()) {
+            connection = DriverManager.getConnection(connectionUrl);
         }
+        return connection;
     }
 
     /**
@@ -39,5 +39,23 @@ public final class SQLiteConnectionPool implements ConnectionPool {
      * This method does nothing, because SQLite does not support connection pooling.
      */
     @Override
-    public void shutdown() {}
+    public synchronized void shutdown() {
+        if (!isConnectionDead()) {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                // Ignore
+            } finally {
+                connection = null;
+            }
+        }
+    }
+
+    private boolean isConnectionDead() {
+        try {
+            return connection == null || connection.isClosed() || !connection.isValid(1);
+        } catch (SQLException e) {
+            return true;
+        }
+    }
 }

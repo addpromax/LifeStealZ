@@ -150,3 +150,4 @@ debugFileCreated: |-
   <click:COPY_TO_CLIPBOARD:%jsonPath%><#8b73f6>%jsonPath%</click>
   <click:COPY_TO_CLIPBOARD:%txtPath%><#8b73f6>%txtPath%</click>
 gracePeriodWithdraw: "&cDu kannst während der Schutzzeit keine Herzen auszahlen!"
+minWithdrawHearts: "&cNicht genug Herzen! Nach dem Abheben musst du mindestens %min% Herzen übrig behalten."

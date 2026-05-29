@@ -156,6 +156,10 @@ public final class InteractionListener implements Listener {
         }
 
         PlayerData playerData = plugin.getStorage().load(player.getUniqueId());
+        if (playerData == null) {
+            plugin.getLogger().severe("PlayerData not found for player " + player.getName() + " on death event. This should not happen!");
+            return;
+        }
 
         Integer savedHeartAmountInteger = item.getItemMeta().getPersistentDataContainer().has(CustomItemManager.CUSTOM_HEART_VALUE_KEY, PersistentDataType.INTEGER) ? item.getItemMeta().getPersistentDataContainer().get(CustomItemManager.CUSTOM_HEART_VALUE_KEY, PersistentDataType.INTEGER) : 1;
         int savedHeartAmount = savedHeartAmountInteger != null ? savedHeartAmountInteger : 1;

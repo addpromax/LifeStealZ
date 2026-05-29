@@ -73,7 +73,7 @@ unwhitelistedWorld: |2
 
   <red><b><grey>></grey> Wereld Whitelist</b></red>
 
-  <gray>Je speelt momenteel op wereld <red><click:COPY_TO_CLIPBOARD:'&world&'><hover:show_text:'&7Kopieer naar klemborg'>&world&</hover></click></red>.
+  <gray>Je speelt momenteel op wereld <red><click:COPY_TO_CLIPBOARD:'&world&'><hover:show_text:'&7Kopieer naar klembord'>&world&</hover></click></red>.
   Deze wereld is niet ge-whitelist. LSZ zal hier niet activeren.</gray>
 
   <red><u><click:open_url:'https://lsz.strassburger.dev/configuration/whitelist'>Documentatie</click></u></red>   <red><u><click:open_url:'https://strassburger.org/discord'>Support Discord</click></u></red>   <u><hover:show_text:'<gray>Om te negeren: Stel 'supressWhitelistMessage' in op <b>true</b> in het config bestand.</gray>'><red>Verberg Bericht</red></hover></u>

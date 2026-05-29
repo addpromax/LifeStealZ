@@ -103,3 +103,4 @@ debugUploadSuccess: "&8 [&a✔&8] &7Debug report uploaded successfully! You can 
 debugFailedToCreateFile: "&cFailed to create debug report file: %error%"
 debugFileCreated: "&8 [&a✔&8] &7Saved debug data to the following files:\n<click:COPY_TO_CLIPBOARD:%jsonPath%><#8b73f6>%jsonPath%</click>\n<click:COPY_TO_CLIPBOARD:%txtPath%><#8b73f6>%txtPath%</click>"
 gracePeriodWithdraw: "&cYou cannot withdraw hearts during the grace period!"
+minWithdrawHearts: "&cInsufficient hearts! You must have at least %min% hearts remaining after withdrawal."

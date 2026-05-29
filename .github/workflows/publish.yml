@@ -20,14 +20,6 @@ jobs:
           java-version: '21'
           cache: 'maven'
 
-      - name: Cache Maven repository
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
       - name: Get release version
         id: get_version
         run: echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
@@ -36,7 +28,7 @@ jobs:
         run: mvn -B versions:set -DnewVersion=${{ github.event.release.tag_name }} -DgenerateBackupPoms=false
 
       - name: Build with Maven
-        run: mvn -B clean package
+        run: mvn -B -U -C clean package -DskipTests
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -90,6 +82,10 @@ jobs:
             1.21.8
             1.21.9
             1.21.10
+            1.21.11
+            26.1
+            26.1.1
+            26.1.2
           status: 'listed'
           channel: 'release'
 
@@ -120,5 +116,5 @@ jobs:
           description: ${{ github.event.release.body }}
           platform_dependencies: |
             {
-              "PAPER": ["1.21.4", "1.21.5", "1.21.6", "1.21.7", "1.21.8", "1.21.9"]
+              "PAPER": ["1.21.4", "1.21.5", "1.21.6", "1.21.7", "1.21.8", "1.21.9", "1.21.10", "1.21.11", "26.1", "26.1.1", "26.1.2"]
             }

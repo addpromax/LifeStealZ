@@ -67,6 +67,18 @@ public final class WithdrawCommand implements CommandExecutor, TabCompleter {
 
         PlayerData playerdata = plugin.getStorage().load(player.getUniqueId());
 
+        int minWithdrawHearts = plugin.getConfig().getInt("minWithdrawHearts", 0);
+        int playerHearts = (int) (playerdata.getMaxHealth() / 2);
+        if (playerHearts - withdrawHearts < minWithdrawHearts) {
+            sender.sendMessage(MessageUtils.getAndFormatMsg(
+                    false,
+                    "minWithdrawHearts",
+                    "&cInsufficient hearts! You must have at least %min% hearts remaining after withdrawal.",
+                    new MessageUtils.Replaceable("%min%", minWithdrawHearts + "")
+            ));
+            return false;
+        }
+
         boolean withdrawtoDeath = plugin.getConfig().getBoolean("allowDyingFromWithdraw");
 
         if (withdrawHearts < 1) {
@@ -103,9 +115,9 @@ public final class WithdrawCommand implements CommandExecutor, TabCompleter {
         }
 
         double resultingHealth = playerdata.getMaxHealth() - ((double) withdrawHearts * 2);
-        double minHealth = plugin.getConfig().getDouble("minHearts", 2.0) * 2; // Default to 2.0 if not set
+        double minHealth = plugin.getConfig().getDouble("minHearts", 0.0) * 2;
 
-        if (resultingHealth < minHealth) {
+        if (resultingHealth <= minHealth) {
             if (confirmOption == null || !confirmOption.equals("confirm")) {
                 sender.sendMessage(MessageUtils.getAndFormatMsg(
                         false,

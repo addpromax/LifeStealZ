@@ -10,3 +10,6 @@ port: 3306
 database: "lifestealz"
 username: "root"
 password: "password"
+
+# Wether or not to enable caching. Only disable this if you know what you're doing, as it can cause performance issues and increase the load on your database.
+enableCache: true

@@ -6,7 +6,7 @@
 
     <groupId>com.zetaplugins</groupId>
     <artifactId>lifestealz</artifactId>
-    <version>2.20.4</version>
+    <version>2.21.1</version>
     <packaging>jar</packaging>
 
     <name>LifeStealZ</name>
@@ -79,7 +79,6 @@
                     <sourcepath>src/main/java</sourcepath>
                     <links>
                         <link>https://jd.papermc.io/paper/1.21.4/</link>
-                        <link>https://docs.enginehub.org/javadoc/com.sk89q.worldguard/worldguard-core/release/</link>
                     </links>
                 </configuration>
                 <executions>
@@ -108,6 +107,10 @@
                             <pattern>org.reflections</pattern>
                             <shadedPattern>com.zetaplugins.lifestealz.libs.reflections</shadedPattern>
                         </relocation>
+                        <relocation>
+                            <pattern>dev.faststats</pattern>
+                            <shadedPattern>com.zetaplugins.lifestealz.libs.faststats</shadedPattern>
+                        </relocation>
                     </relocations>
                     <filters>
                         <filter>
@@ -118,6 +121,12 @@
                         </filter>
                         <filter>
                             <artifact>com.zetaplugins:zetacore</artifact>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </filter>
+                        <filter>
+                            <artifact>dev.faststats.metrics:bukkit</artifact>
                             <includes>
                                 <include>**/*</include>
                             </includes>
@@ -135,6 +144,8 @@
                         <includes>
                             <include>com.zaxxer:HikariCP</include>
                             <include>com.zetaplugins:zetacore</include>
+                            <include>dev.faststats.metrics:bukkit</include>
+                            <include>dev.faststats.metrics:core</include>
                         </includes>
                     </artifactSet>
                     <transformers>
@@ -182,6 +193,10 @@
         <repository>
             <id>infernalsuite</id>
             <url>https://repo.infernalsuite.com/repository/maven-snapshots/</url>
+        </repository>
+        <repository>
+            <id>faststats-releases</id>
+            <url>https://repo.faststats.dev/releases</url>
         </repository>
     </repositories>
 
@@ -265,6 +280,15 @@
             <version>4.0.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>dev.faststats.metrics</groupId>
+            <artifactId>core</artifactId>
+            <version>0.22.0</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.faststats.metrics</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>0.22.0</version>
+        </dependency>
     </dependencies>
 </project>
