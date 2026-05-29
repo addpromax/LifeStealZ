@@ -83,6 +83,10 @@ revive:
   # --- Revive Beacon specific Settings --- (only relevant if customItemType is "revivebeacon")
   # The time in seconds it takes to revive a player
   reviveTime: 30
+  # The durability of the beacon (how many times it can be used, -1 for infinite)
+  durability: 10
+  # Whether players can set this beacon as their auto-revive point
+  allowAutoRevive: true
   # If players should be able to break the beacon while reviving, interrupting the revive process
   allowBreakingBeaconWhileReviving: true
   # The material around the beacon (AIR for no material)
@@ -100,6 +104,40 @@ revive:
   # The color of the particle ring
   # possible values: WHITE, GRAY, RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE, PINK
   particleColor: "RED"
+  # --- Hologram Settings ---
+  # Hologram display settings for the revive beacon
+  hologram:
+    # Whether to show the hologram above the beacon
+    enabled: true
+    # The title of the hologram when the beacon is idle (not reviving)
+    title: "&c&l复活信标"
+    # The format for displaying the owner's name
+    # %owner% will be replaced with the owner's name
+    ownerFormat: "&7所有者: &e%owner%"
+    # The format for displaying the durability
+    # %durability% will be replaced with current durability
+    # %maxDurability% will be replaced with maximum durability
+    durabilityFormat: "&7耐久: &a%durability%&7/&a%maxDurability%"
+    # The title of the hologram when the beacon is reviving
+    revivingTitle: "&e&l复活进行中"
+    # The format for displaying the target player being revived
+    # %target% will be replaced with the target player's name
+    targetFormat: "&7目标: &e%target%"
+    # The format for displaying the remaining time
+    # %time% will be replaced with the remaining time (MM:SS format)
+    timeFormat: "&7剩余时间: &e%time%"
+    # Background color for the hologram text
+    # Options:
+    #   - "transparent" for no background (default)
+    #   - "#RRGGBB" for RGB color (e.g., "#FF0000" for red)
+    #   - "#AARRGGBB" for ARGB color with alpha/transparency (e.g., "#80FF0000" for semi-transparent red)
+    background: "transparent"
+    # Hologram position offset from the beacon block center
+    # Default: x=0.5, y=2.5, z=0.5 (centered above the beacon)
+    offsetX: 0.5
+    offsetY: 2.5
+    offsetZ: 0.5
+  # --- End of Hologram Settings ---
   # --- End of Revive Beacon specific Settings ---
   requirePermission: false # (lifestealz.item.revive)
   craftable: true
@@ -125,5 +163,46 @@ revive:
     sound: ENTITY_PLAYER_LEVELUP
     volume: 1.0
     pitch: 1.0
+
+beaconrepair:
+  name: "&6Beacon Repair Kit"
+  lore:
+    - "&7Right-click a beacon to repair"
+    - "&7Restores &a+5 &7durability"
+  material: "IRON_INGOT"
+  enchanted: true
+  customModelId: 0
+  customItemType: "beaconrepair"
+  # --- Beacon Repair specific Settings --- (only relevant if customItemType is "beaconrepair")
+  # The amount of durability to restore
+  repairAmount: 5
+  # List of beacon item IDs that can be repaired (empty list = all beacons)
+  # Example: ["revive", "special_beacon"]
+  allowedBeacons: []
+  # --- End of Beacon Repair specific Settings ---
+  requirePermission: false # (lifestealz.item.beaconrepair)
+  craftable: true
+  recipes:
+    1:
+      rowOne:
+        - "IRON_INGOT"
+        - "DIAMOND"
+        - "IRON_INGOT"
+      rowTwo:
+        - "DIAMOND"
+        - "NETHER_STAR"
+        - "DIAMOND"
+      rowThree:
+        - "IRON_INGOT"
+        - "DIAMOND"
+        - "IRON_INGOT"
+  invulnerable: false
+  despawnable: true
+  whitelistedWorlds: []
+  sound:
+    enabled: true
+    sound: BLOCK_ANVIL_USE
+    volume: 1.0
+    pitch: 1.2
 
 # You can add as many custom items as you want

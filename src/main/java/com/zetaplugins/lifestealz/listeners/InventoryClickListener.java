@@ -342,6 +342,11 @@ public final class InventoryClickListener implements Listener {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand);
         }
 
+        // 获取耐久度信息
+        var beaconInfo = plugin.getBeaconDurabilityData().getBeaconInfo(beaconLocation);
+        int durability = beaconInfo != null ? beaconInfo.getDurability() : -1;
+        int maxDurability = beaconInfo != null ? beaconInfo.getMaxDurability() : -1;
+
         plugin.getReviveBeaconEffectManager().startRevivingEffects(
                 beaconLocation,
                 target.getName(),
@@ -353,6 +358,15 @@ public final class InventoryClickListener implements Listener {
                 itemData.getReviveTime()
         );
 
+        // 创建复活中的全息显示
+        plugin.getReviveBeaconHologramManager().createRevivingHologram(
+                beaconLocation,
+                target.getName(),
+                itemData.getReviveTime(),
+                durability,
+                maxDurability
+        );
+
         BukkitTask reviveTask = new BukkitRunnable() {
             @Override
             public void run() {
@@ -361,8 +375,67 @@ public final class InventoryClickListener implements Listener {
 
                 plugin.getReviveTaskManager().removeReviveTask(beaconLocation);
 
+                // 减少耐久度
+                int remainingDurability = plugin.getBeaconDurabilityData().decreaseDurability(beaconLocation);
+                
+                // 同步到数据库
+                if (plugin.getBeaconDataStorage() != null && remainingDurability >= 0) {
+                    plugin.getBeaconDataStorage().updateBeaconDurability(beaconLocation, remainingDurability);
+                }
+                
+                // 清理特效和全息显示
                 plugin.getReviveBeaconEffectManager().clearAllEffects(beaconLocation);
-                beaconLocation.getBlock().setType(Material.AIR);
+                plugin.getReviveBeaconHologramManager().removeHologram(beaconLocation);
+                
+                // 如果耐久度为0或信标设置为一次性，销毁信标
+                if (remainingDurability == 0) {
+                    beaconLocation.getBlock().setType(Material.AIR);
+                    plugin.getBeaconDurabilityData().removeBeacon(beaconLocation);
+                    plugin.getAutoReviveManager().removeBeaconLocation(beaconLocation);
+                    
+                    // 从数据库删除
+                    if (plugin.getBeaconDataStorage() != null) {
+                        plugin.getBeaconDataStorage().removeBeacon(beaconLocation);
+                        if (plugin.getConfig().getBoolean("debug", false)) {
+                            plugin.getLogger().info("耐久度耗尽，已从数据库删除信标: " + beaconLocation);
+                        }
+                    }
+                    
+                    reviver.sendMessage(MessageUtils.getAndFormatMsg(
+                            true,
+                            "beaconDurabilityZero",
+                            "&cThe beacon's durability has been depleted and it has been destroyed!"
+                    ));
+                } else if (remainingDurability > 0) {
+                    // 重新创建空闲状态的全息显示和特效
+                    var info = plugin.getBeaconDurabilityData().getBeaconInfo(beaconLocation);
+                    if (info != null) {
+                        // 重新启动空闲特效（包括装饰方块）
+                        plugin.getReviveBeaconEffectManager().startIdleEffects(
+                                beaconLocation,
+                                itemData.shouldShowEnchantParticles(),
+                                itemData.getDecoyMaterial()
+                        );
+                        
+                        plugin.getReviveBeaconHologramManager().createIdleHologram(
+                                beaconLocation,
+                                info.getOwnerName(),
+                                remainingDurability,
+                                info.getMaxDurability()
+                        );
+                        
+                        // 如果耐久度低，发送警告
+                        if (remainingDurability <= 3 && remainingDurability > 0) {
+                            reviver.sendMessage(MessageUtils.getAndFormatMsg(
+                                    true,
+                                    "beaconDurabilityLow",
+                                    "&cWarning: The beacon only has &e%durability%&c uses left!",
+                                    new MessageUtils.Replaceable("%durability%", String.valueOf(remainingDurability))
+                            ));
+                        }
+                    }
+                }
+                
                 beaconLocation.getWorld().playSound(beaconLocation, Sound.ENTITY_PLAYER_LEVELUP, 500.0f, 1.0f);
             }
         }.runTaskLater(plugin, itemData.getReviveTime() * 20L);

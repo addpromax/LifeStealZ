@@ -295,6 +295,18 @@ public final class PlayerDeathListener implements Listener {
                 return;
             }
 
+            // 检查是否有自动复活设置
+            if (plugin.getAutoReviveManager().hasAutoRevive(player.getUniqueId())) {
+                if (plugin.getAutoReviveManager().tryAutoRevive(player)) {
+                    // 不踢出玩家，让 PlayerRespawnListener 处理自动复活
+                    // 设置玩家数据为可复活状态
+                    double respawnHP = plugin.getConfig().getInt("reviveHearts") * 2;
+                    playerData.setMaxHealth(respawnHP);
+                    plugin.getStorage().save(playerData);
+                    return;
+                }
+            }
+
             // Kick the player
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
                 if (player.isOnline()) { // Avoids trying to kick NPCs since they are not online

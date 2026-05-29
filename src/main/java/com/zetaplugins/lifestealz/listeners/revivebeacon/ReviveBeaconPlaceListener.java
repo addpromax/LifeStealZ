@@ -63,10 +63,54 @@ public final class ReviveBeaconPlaceListener implements Listener {
 
         CustomBlock.REVIVE_BEACON.make(block, customItemId);
 
+        // 初始化耐久度数据
+        int durability = itemData.getDurability();
+        int maxDurability = durability;
+        plugin.getBeaconDurabilityData().setBeaconData(
+                block.getLocation(),
+                player.getUniqueId(),
+                player.getName(),
+                durability,
+                maxDurability
+        );
+        
+        // 保存到数据库
+        if (plugin.getBeaconDataStorage() != null) {
+            boolean isSlimeWorld = com.zetaplugins.lifestealz.util.SlimeWorldHelper.isSlimeWorld(block.getWorld());
+            
+            if (plugin.getConfig().getBoolean("debug", false)) {
+                plugin.getLogger().info("准备保存信标到数据库: " + block.getLocation() + 
+                    " (所有者: " + player.getName() + 
+                    ", UUID: " + player.getUniqueId() +
+                    ", 耐久度: " + durability + "/" + maxDurability +
+                    ", SlimeWorld: " + isSlimeWorld + ")");
+            }
+            
+            plugin.getBeaconDataStorage().saveBeacon(
+                    block.getLocation(),
+                    player.getUniqueId(),
+                    player.getName(),
+                    durability,
+                    maxDurability,
+                    isSlimeWorld
+            );
+        } else {
+            plugin.getLogger().warning("BeaconDataStorage 未初始化，无法保存信标数据！");
+        }
+
+        // 启动空闲特效
         plugin.getReviveBeaconEffectManager().startIdleEffects(
                 block.getLocation(),
                 itemData.shouldShowEnchantParticles(),
                 itemData.getDecoyMaterial()
+        );
+
+        // 创建全息显示
+        plugin.getReviveBeaconHologramManager().createIdleHologram(
+                block.getLocation(),
+                player.getName(),
+                durability,
+                maxDurability
         );
     }
 

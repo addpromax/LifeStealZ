@@ -61,4 +61,16 @@ public class ReviveTaskManager {
                 .stream()
                 .anyMatch(task -> task.target().equals(playerId));
     }
+
+    /**
+     * Checks if the player is in auto-revive spectator mode.
+     * This means the player is both the reviver and target (auto-reviving themselves).
+     * @param playerId the UUID of the player to check
+     * @return true if the player is auto-reviving, false otherwise
+     */
+    public boolean isAutoReviving(UUID playerId) {
+        return reviveTasks.values()
+                .stream()
+                .anyMatch(task -> task.target().equals(playerId) && task.reviver().equals(playerId));
+    }
 }

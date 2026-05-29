@@ -63,14 +63,31 @@ public final class ReviveBeaconBreakListener implements Listener {
             }
         }
 
+        // 清理特效和全息显示（必须在第一时间清理，避免装饰方块残留）
         plugin.getReviveBeaconEffectManager().clearAllEffects(location);
+        plugin.getReviveBeaconHologramManager().removeHologram(location);
+        
+        // 清理自动复活设置
+        plugin.getAutoReviveManager().removeBeaconLocation(location);
+        
+        // 清理耐久度数据
+        plugin.getBeaconDurabilityData().removeBeacon(location);
+        
+        // 从数据库删除
+        if (plugin.getBeaconDataStorage() != null) {
+            plugin.getBeaconDataStorage().removeBeacon(location);
+            if (plugin.getConfig().getBoolean("debug", false)) {
+                plugin.getLogger().info("已从数据库删除信标数据: " + location);
+            }
+        }
 
         event.setDropItems(false);
         if (!player.getGameMode().equals(GameMode.SURVIVAL)) return;
         String customID = CustomBlock.REVIVE_BEACON.getCustomItemId(block);
         if (customID == null) return;
         ItemStack item = CustomItemManager.createCustomItem(customID);
-        block.getWorld().dropItemNaturally(location.add(0.5, 0.5, 0.5), item);
+        // 使用 clone() 避免修改原始位置对象
+        block.getWorld().dropItemNaturally(location.clone().add(0.5, 0.5, 0.5), item);
     }
 
     @EventHandler

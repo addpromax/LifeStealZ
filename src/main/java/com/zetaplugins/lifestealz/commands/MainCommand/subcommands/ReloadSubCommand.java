@@ -23,6 +23,10 @@ public final class ReloadSubCommand implements SubCommand {
         plugin.reloadConfig();
         plugin.getLanguageManager().reload();
         plugin.getRecipeManager().registerRecipes();
+        
+        // 重新加载所有信标的全息显示
+        plugin.getReviveBeaconHologramManager().reloadAllHolograms();
+        
         sender.sendMessage(MessageUtils.getAndFormatMsg(true, "reloadMsg", "&7Successfully reloaded the plugin!"));
         return true;
     }

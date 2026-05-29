@@ -16,9 +16,13 @@ import com.zetaplugins.lifestealz.api.LifeStealZAPIImpl;
 import com.zetaplugins.lifestealz.caches.EliminatedPlayersCache;
 import com.zetaplugins.lifestealz.caches.OfflinePlayerCache;
 import com.zetaplugins.lifestealz.util.customblocks.ReviveBeaconEffectManager;
+import com.zetaplugins.lifestealz.util.customblocks.ReviveBeaconHologramManager;
+import com.zetaplugins.lifestealz.util.customblocks.BeaconDurabilityData;
+import com.zetaplugins.lifestealz.util.revive.AutoReviveManager;
 import com.zetaplugins.lifestealz.util.customitems.recipe.RecipeManager;
 import com.zetaplugins.lifestealz.util.geysermc.GeyserManager;
 import com.zetaplugins.lifestealz.util.geysermc.GeyserPlayerFile;
+import com.zetaplugins.lifestealz.storage.BeaconDataStorage;
 import com.zetaplugins.lifestealz.storage.MariaDBStorage;
 import com.zetaplugins.lifestealz.storage.MySQLStorage;
 import com.zetaplugins.lifestealz.storage.Storage;
@@ -31,7 +35,6 @@ import java.util.List;
 public final class LifeStealZ extends ZetaCorePlugin {
     private static final String PACKAGE_PREFIX = "com.zetaplugins.lifestealz";
 
-    private VersionChecker versionChecker;
     private Storage storage;
     private WorldGuardManager worldGuardManager;
     private LanguageManager languageManager;
@@ -46,7 +49,11 @@ public final class LifeStealZ extends ZetaCorePlugin {
     private OfflinePlayerCache offlinePlayerCache;
     private AsyncTaskManager asyncTaskManager;
     private ReviveBeaconEffectManager reviveBeaconEffectManager;
+    private ReviveBeaconHologramManager reviveBeaconHologramManager;
+    private BeaconDurabilityData beaconDurabilityData;
+    private AutoReviveManager autoReviveManager;
     private ReviveTaskManager reviveTaskManager;
+    private BeaconDataStorage beaconDataStorage;
     private final boolean hasWorldGuard = Bukkit.getPluginManager().getPlugin("WorldGuard") != null;
     private final boolean hasPlaceholderApi = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
     private final boolean hasGeyser = Bukkit.getPluginManager().getPlugin("floodgate") != null;
@@ -83,18 +90,25 @@ public final class LifeStealZ extends ZetaCorePlugin {
 
         asyncTaskManager = new AsyncTaskManager();
         reviveBeaconEffectManager = new ReviveBeaconEffectManager(this);
+        reviveBeaconHologramManager = new ReviveBeaconHologramManager(this);
+        beaconDurabilityData = new BeaconDurabilityData();
+        autoReviveManager = new AutoReviveManager(this);
         reviveTaskManager = new ReviveTaskManager();
 
         languageManager = new LanguageManager(this);
         configManager = new ConfigManager(this);
 
+        // 先初始化主 Storage
         storage = createPlayerDataStorage();
         storage.init();
+        
+        // 然后初始化信标数据存储（依赖 storage）
+        beaconDataStorage = new BeaconDataStorage(this);
+        getLogger().info("信标数据存储系统已启动");
 
         recipeManager = new RecipeManager(this);
         recipeManager.registerRecipes();
 
-        versionChecker = new VersionChecker(this, "l8Uv7FzS");
         gracePeriodManager = new GracePeriodManager(this);
         bypassManager = new BypassManager(this);
         webHookManager = new WebHookManager(this);
@@ -118,6 +132,11 @@ public final class LifeStealZ extends ZetaCorePlugin {
             }
         }
 
+        // 延迟加载全息显示，等待世界完全加载
+        getServer().getScheduler().runTaskLater(this, () -> {
+            reviveBeaconHologramManager.reloadAllHolograms();
+        }, 20L); // 1秒后执行
+
         getLogger().info("LifeStealZ enabled!");
     }
 
@@ -126,6 +145,15 @@ public final class LifeStealZ extends ZetaCorePlugin {
         getLogger().info("Canceling all running tasks...");
         asyncTaskManager.cancelAllTasks();
         reviveBeaconEffectManager.clearAllEffects();
+        reviveBeaconHologramManager.clearAll();
+        beaconDurabilityData.clearAll();
+        autoReviveManager.clearAll();
+        
+        // 关闭信标数据存储
+        if (beaconDataStorage != null) {
+            beaconDataStorage.close();
+        }
+        
         getLogger().info("LifeStealZ disabled!");
     }
 
@@ -149,8 +177,20 @@ public final class LifeStealZ extends ZetaCorePlugin {
         return reviveTaskManager;
     }
 
-    public VersionChecker getVersionChecker() {
-        return versionChecker;
+    public ReviveBeaconHologramManager getReviveBeaconHologramManager() {
+        return reviveBeaconHologramManager;
+    }
+
+    public BeaconDurabilityData getBeaconDurabilityData() {
+        return beaconDurabilityData;
+    }
+
+    public AutoReviveManager getAutoReviveManager() {
+        return autoReviveManager;
+    }
+
+    public BeaconDataStorage getBeaconDataStorage() {
+        return beaconDataStorage;
     }
 
     public Storage getStorage() {

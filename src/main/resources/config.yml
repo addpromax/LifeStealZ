@@ -17,6 +17,17 @@
 # If set to true, LifeStealZ will check for updates and let you know if there's a newer version
 checkForUpdates: true
 
+# Enable debug mode to see detailed logs for troubleshooting (e.g., hologram creation, beacon events)
+debug: false
+
+# Commands that players can use while in spectator mode during auto-revive
+# Players in spectator mode during auto-revive will only be able to use these commands
+# Use "*" to allow all commands (not recommended)
+autoReviveAllowedCommands:
+  - "/spawn"
+  - "/help"
+  - "/rules"
+
 # Set the language to any code found in the "lang" folder (don't add the .yml extension)
 # You can add your own language files. Use https://github.com/KartoffelChipss/LifeStealZ/tree/main/src/main/resources/lang/en-US.yml as a template
 # If you want to help translating the plugin, please refer to this article: https://lsz.strassburger.dev/contributing/localization

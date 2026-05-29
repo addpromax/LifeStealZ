@@ -12,6 +12,9 @@ import com.zetaplugins.lifestealz.util.GuiManager;
 import com.zetaplugins.lifestealz.util.MessageUtils;
 import com.zetaplugins.lifestealz.util.revive.ReviveTask;
 import com.zetaplugins.lifestealz.util.customblocks.CustomBlock;
+import com.zetaplugins.lifestealz.util.customblocks.BeaconDurabilityData;
+import com.zetaplugins.lifestealz.util.customitems.CustomItemManager;
+import com.zetaplugins.lifestealz.util.customitems.customitemdata.CustomReviveBeaconItemData;
 
 @AutoRegisterListener
 public final class ReviveBeaconInteractListener implements Listener {
@@ -32,6 +35,7 @@ public final class ReviveBeaconInteractListener implements Listener {
         Player player = event.getPlayer();
         event.setCancelled(true);
 
+        // 检查是否正在复活中
         ReviveTask reviveTask = plugin.getReviveTaskManager().getReviveTask(block.getLocation());
         if (reviveTask != null) {
             long nowSeconds = System.currentTimeMillis() / 1000L;
@@ -45,8 +49,49 @@ public final class ReviveBeaconInteractListener implements Listener {
             return;
         }
 
-        GuiManager.openReviveBeaconGui(player, 1, plugin, block.getLocation());
+        // 获取信标数据
+        BeaconDurabilityData.BeaconInfo beaconInfo = plugin.getBeaconDurabilityData().getBeaconInfo(block.getLocation());
+        if (beaconInfo == null) {
+            return;
+        }
 
-        //plugin.getReviveBeaconEffectManager().startRevivingEffects(block.getLocation());
+        // 获取自定义物品数据
+        String customItemId = CustomBlock.REVIVE_BEACON.getCustomItemId(block);
+        CustomReviveBeaconItemData itemData;
+        try {
+            itemData = new CustomReviveBeaconItemData(customItemId);
+        } catch (IllegalArgumentException e) {
+            return;
+        }
+
+        // 如果玩家潜行且是信标所有者，并且允许自动复活
+        if (player.isSneaking() && player.getUniqueId().equals(beaconInfo.getOwnerId()) && itemData.isAllowAutoRevive()) {
+            // 检查是否已设置自动复活
+            if (plugin.getAutoReviveManager().hasAutoRevive(player.getUniqueId())) {
+                // 移除自动复活设置
+                plugin.getAutoReviveManager().removeAutoReviveBeacon(player.getUniqueId());
+                player.sendMessage(MessageUtils.getAndFormatMsg(
+                        true,
+                        "beaconRemoveAutoRevive",
+                        "&7You have removed your auto-revive setting!"
+                ));
+            } else {
+                // 设置自动复活
+                plugin.getAutoReviveManager().setAutoReviveBeacon(
+                        player.getUniqueId(),
+                        block.getLocation(),
+                        player.getName()
+                );
+                player.sendMessage(MessageUtils.getAndFormatMsg(
+                        true,
+                        "beaconSetAutoRevive",
+                        "&7You have set this beacon as your auto-revive point!"
+                ));
+            }
+            return;
+        }
+
+        // 打开复活GUI
+        GuiManager.openReviveBeaconGui(player, 1, plugin, block.getLocation());
     }
 }

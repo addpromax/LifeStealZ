@@ -13,6 +13,7 @@ public enum CustomItemType {
     HEART("heart"),
     REVIVE("revive"),
     REVIVE_BEACON("revivebeacon"),
+    BEACON_REPAIR("beaconrepair"),
     NONE("none"),
     NONUSABLE("non-usable");
 

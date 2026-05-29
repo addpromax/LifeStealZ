@@ -39,8 +39,6 @@ public final class PlayerJoinListener implements Listener {
 
         PlayerData playerData = loadOrCreatePlayerData(player, storage, plugin.getConfig().getInt("startHearts", 10));
         LifeStealZ.setMaxHealth(player, playerData.getMaxHealth());
-
-        notifyOpAboutUpdate(player);
     }
 
     private PlayerData loadOrCreatePlayerData(Player player, Storage storage, int startHearts) {
@@ -54,11 +52,5 @@ public final class PlayerJoinListener implements Listener {
             plugin.getOfflinePlayerCache().addItem(player.getName());
         }
         return playerData;
-    }
-
-    private void notifyOpAboutUpdate(Player player) {
-        if (player.isOp() && plugin.getConfig().getBoolean("checkForUpdates") && plugin.getVersionChecker().isNewVersionAvailable()) {
-            player.sendMessage(MessageUtils.getAndFormatMsg(true, "newVersionAvailable", "&7A new version of LifeStealZ is available!\\n&c<click:OPEN_URL:https://modrinth.com/plugin/lifestealz/versions>https://modrinth.com/plugin/lifestealz/versions</click>"));
-        }
     }
 }

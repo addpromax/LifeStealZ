@@ -405,7 +405,16 @@ public final class ReviveBeaconEffectManager {
      */
     public void removeDecoy(Location location) {
         BlockDisplay display = decoyDisplays.remove(getKey(location));
-        if (display != null) display.remove();
+        if (display != null) {
+            display.remove();
+            if (plugin.getConfig().getBoolean("debug", false)) {
+                plugin.getLogger().info("已移除装饰方块 (decoy) at: " + location);
+            }
+        } else {
+            if (plugin.getConfig().getBoolean("debug", false)) {
+                plugin.getLogger().warning("未找到装饰方块 (decoy) at: " + location);
+            }
+        }
     }
 
     /**
